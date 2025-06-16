@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>مكتبة شريف | Sharif Bookstore</title>
+<style>
+  /* Reset and base */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  html {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background-color: #ffeb3b; /* أصفر الخلفية */
+    color: #003366; /* أزرق نص */
+    direction: rtl;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Container */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+    flex: 1 0 auto;
+  }
+
+  /* Header */
+  header {
+    background-color: #ffd600;
+    padding: 16px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #003366;
+    cursor: pointer;
+    user-select: none;
+  }
+  nav {
+    display: flex;
+    gap: 24px;
+  }
+  nav button.lang-btn {
+    background: none;
+    border: none;
+    color: #003366;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+  nav button.lang-btn:hover,
+  nav button.lang-btn.active {
+    background-color: #003366;
+    color: #ffeb3b;
+  }
+
+  /* Main content */
+  main {
+    flex-grow: 1;
+    padding: 32px 0;
+  }
+
+  /* Titles */
+  h1, h2, h3 {
+    color: #003366;
+    margin-bottom: 24px;
+    font-weight: 700;
+  }
+  h1 {
+    font-size: 2.6rem;
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  h2 {
+    font-size: 2rem;
+  }
+  h3 {
+    font-size: 1.4rem;
+  }
+
+  /* Products List */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+    gap: 32px;
+  }
+  .product-card {
+    background: rgba(255 255 255 / 0.9);
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-image {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background-color: #c7c7c7;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .product-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .product-price {
+    color: #0066cc;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .product-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+  }
+  button {
+    background: #003366;
+    color: #ffeb3b;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #002244;
+  }
+  .btn-danger {
+    background: #cc0033;
+  }
+  .btn-danger:hover {
+    background: #990022;
+  }
+
+  /* Add product button fixed at bottom right */
+  .add-product-btn {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    background: #003366;
+    color: #ffeb3b;
+    border-radius: 50%;
+    font-size: 2rem;
+    width: 56px;
+    height: 56px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    z-index: 1100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  .add-product-btn:hover {
+    background: #001a44;
+  }
+
+  /* Modal background */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1200;
+  }
+  .modal-backdrop.show {
+    display: flex;
+  }
+  /* Modal window */
+  .modal {
+    background: #ffeb3b;
+    border-radius: 16px;
+    max-width: 480px;
+    width: 90vw;
+    padding: 24px 32px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    color: #003366;
+    font-weight: 600;
+  }
+  .modal h2 {
+    margin-top: 0;
+  }
+  .modal label {
+    display: block;
+    margin-bottom: 6px;
+    margin-top: 18px;
+    font-weight: 700;
+  }
+  .modal input[type="text"],
+  .modal input[type="number"],
+  .modal select,
+  .modal textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #003366;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  .modal textarea {
+    resize: vertical;
+  }
+  .modal-buttons {
+    margin-top: 28px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+  
+  /* Responsive header nav for mobile */
+  @media (max-width: 640px) {
+    .header-inner {
+      flex-direction: column;
+      gap: 8px;
+    }
+    nav {
+      width: 100%;
+      justify-content: center;
+    }
+    h1 {
+      font-size: 2rem;
+    }
+  }
+
+  /* Footer */
+  footer {
+    background-color: #ffd600;
+    padding: 16px 24px;
+    text-align: center;
+    color: #003366;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* Tab content */
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Section nav tabs */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .tabs button {
+    background: none;
+    border: 2px solid transparent;
+    color: #003366;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 8px 20px;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+  .tabs button.active {
+    border-color: #003366;
+    background-color: #003366;
+    color: #ffeb3b;
+  }
+
+  /* Payment options */
+  .payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: #003366;
+    color: #ffeb3b;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    z-index: 1500;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner" role="banner">
+    <div class="logo" tabindex="0">مكتبة شريف</div>
+    <nav aria-label="اختيار اللغة">
+      <button class="lang-btn active" id="btn-ar" aria-pressed="true" aria-label="تبديل اللغة للعربية">العربية</button>
+      <button class="lang-btn" id="btn-en" aria-pressed="false" aria-label="Switch language to English">English</button>
+    </nav>
+  </div>
+</header>
+<main class="container" role="main">
+  <h1 data-i18n="welcome">مرحبًا بك في مكتبة شريف</h1>
+
+  <div class="tabs" role="tablist" aria-label="Sections tabs">
+    <button class="tab-link active" data-tab="products" role="tab" aria-selected="true" tabindex="0" id="tab-products" aria-controls="section-products" data-i18n="products">المنتجات</button>
+    <button class="tab-link" data-tab="dashboard" role="tab" aria-selected="false" tabindex="-1" id="tab-dashboard" aria-controls="section-dashboard" data-i18n="dashboard">لوحة التحكم</button>
+    <button class="tab-link" data-tab="payment" role="tab" aria-selected="false" tabindex="-1" id="tab-payment" aria-controls="section-payment" data-i18n="payments">الدفع</button>
+    <button class="tab-link" data-tab="help" role="tab" aria-selected="false" tabindex="-1" id="tab-help" aria-controls="section-help" data-i18n="help">المساعدة</button>
+  </div>
+
+  <section id="section-products" class="tab-content active" role="tabpanel" aria-labelledby="tab-products" tabindex="0">
+    <div class="products-grid" aria-live="polite" aria-label="قائمة المنتجات" id="products-list">
+      <!-- Products will be rendered here -->
+    </div>
+  </section>
+
+  <section id="section-dashboard" class="tab-content" role="tabpanel" aria-labelledby="tab-dashboard" tabindex="0">
+    <h2 data-i18n="dashboard_title">لوحة التحكم لإدارة المنتجات</h2>
+    <button class="add-product-btn" aria-label="أضف منتج جديد" id="btn-add-product">+</button>
+    <p data-i18n="dashboard_desc">يمكنك إضافة، تعديل، أو حذف المنتجات بكل سهولة من هنا.</p>
+  </section>
+
+  <section id="section-payment" class="tab-content" role="tabpanel" aria-labelledby="tab-payment" tabindex="0">
+    <h2 data-i18n="payment_methods">وسائل الدفع المتاحة</h2>
+    <div class="payment-options">
+      <button class="payment-btn" data-method="cash" aria-label="الدفع عند الاستلام">الدفع عند الاستلام</button>
+      <button class="payment-btn" data-method="visa" aria-label="بطاقة فيزا">بطاقة فيزا</button>
+      <button class="payment-btn" data-method="vodafone" aria-label="فودافون كاش">فودافون كاش</button>
+    </div>
+    <p data-i18n="payment_info">* سيتم محاكاة تجربة الدفع هنا فقط.</p>
+  </section>
+
+  <section id="section-help" class="tab-content" role="tabpanel" aria-labelledby="tab-help" tabindex="0">
+    <h2 data-i18n="help_title">تعليمات الاستخدام</h2>
+    <ul>
+      <li><strong data-i18n="how_to_access">كيفية الدخول للموقع:</strong> <span data-i18n="how_to_access_desc">ادخل إلى الملف sharif-bookstore.html في متصفحك.</span></li>
+      <li><strong data-i18n="add_products">كيفية إضافة المنتجات:</strong> <span data-i18n="add_products_desc">انتقل إلى "لوحة التحكم" واضغط على زر + لإضافة منتج جديد.</span></li>
+      <li><strong data-i18n="edit_products">كيفية تعديل الأسعار أو الصور:</strong> <span data-i18n="edit_products_desc">في لوحة التحكم، اضغط على أيقونة تعديل بجانب المنتج المراد تغييره.</span></li>
+      <li><strong data-i18n="discounts">كيفية إضافة خصم أو كود تخفيض:</strong> <span data-i18n="discounts_desc">في النسخة الحالية، يمكنك تعديل السعر مباشرة في لوحة التحكم لتطبيق الخصم.</span></li>
+      <li><strong data-i18n="support">الدعم والمساعدة:</strong> <span data-i18n="support_desc">يمكنك التواصل معنا عبر البريد الإلكتروني للمساعدة.</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  &copy; 2024 مكتبة شريف | Sharif Bookstore
+</footer>
+
+<!-- Modal for adding/editing product -->
+<div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+  <div class="modal" role="document">
+    <h2 id="modal-title" data-i18n="modal_add_product">إضافة / تعديل منتج</h2>
+    <form id="product-form">
+      <label for="product-name-input" data-i18n="product_name_label">اسم المنتج</label>
+      <input type="text" id="product-name-input" name="name" required aria-required="true" autocomplete="off" />
+      
+      <label for="product-category-select" data-i18n="product_category_label">القسم</label>
+      <select id="product-category-select" name="category" required aria-required="true">
+        <option value="" disabled selected data-i18n="select_category">اختر القسم</option>
+        <option value="kids" data-i18n="category_kids">لعب أطفال</option>
+        <option value="stationery" data-i18n="category_stationery">أدوات مدرسية</option>
+        <option value="misc" data-i18n="category_misc">خردوات</option>
+        <option value="home" data-i18n="category_home">منتجات منزلية</option>
+      </select>
+
+      <label for="product-price-input" data-i18n="product_price_label">السعر (جنيه)</label>
+      <input type="number" id="product-price-input" name="price" min="0" step="0.01" required aria-required="true" />
+      
+      <label for="product-image-input" data-i18n="product_image_label">رابط صورة المنتج</label>
+      <input type="text" id="product-image-input" name="image" placeholder="https://example.com/image.jpg" autocomplete="off" />
+
+      <label for="product-description-input" data-i18n="product_description_label">وصف المنتج</label>
+      <textarea id="product-description-input" name="description" rows="3"></textarea>
+
+      <div class="modal-buttons">
+        <button type="submit" id="save-product-btn" data-i18n="save_btn">حفظ</button>
+        <button type="button" id="cancel-product-btn" class="btn-danger" data-i18n="cancel_btn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+  (() => {
+    'use strict';
+
+    // Localization strings
+    const translations = {
+      ar: {
+        welcome: 'مرحبًا بك في مكتبة شريف',
+        products: 'المنتجات',
+        dashboard: 'لوحة التحكم',
+        payments: 'الدفع',
+        help: 'المساعدة',
+        dashboard_title: 'لوحة التحكم لإدارة المنتجات',
+        dashboard_desc: 'يمكنك إضافة، تعديل، أو حذف المنتجات بكل سهولة من هنا.',
+        payment_methods: 'وسائل الدفع المتاحة',
+        payment_info: '* سيتم محاكاة تجربة الدفع هنا فقط.',
+        help_title: 'تعليمات الاستخدام',
+        how_to_access: 'كيفية الدخول للموقع:',
+        how_to_access_desc: 'ادخل إلى الملف sharif-bookstore.html في متصفحك.',
+        add_products: 'كيفية إضافة المنتجات:',
+        add_products_desc: 'انتقل إلى "لوحة التحكم" واضغط على زر + لإضافة منتج جديد.',
+        edit_products: 'كيفية تعديل الأسعار أو الصور:',
+        edit_products_desc: 'في لوحة التحكم، اضغط على أيقونة تعديل بجانب المنتج المراد تغييره.',
+        discounts: 'كيفية إضافة خصم أو كود تخفيض:',
+        discounts_desc: 'في النسخة الحالية، يمكنك تعديل السعر مباشرة في لوحة التحكم لتطبيق الخصم.',
+        support: 'الدعم والمساعدة:',
+        support_desc: 'يمكنك التواصل معنا عبر البريد الإلكتروني للمساعدة.',
+        modal_add_product: 'إضافة / تعديل منتج',
+        product_name_label: 'اسم المنتج',
+        product_category_label: 'القسم',
+        select_category: 'اختر القسم',
+        category_kids: 'لعب أطفال',
+        category_stationery: 'أدوات مدرسية',
+        category_misc: 'خردوات',
+        category_home: 'منتجات منزلية',
+        product_price_label: 'السعر (جنيه)',
+        product_image_label: 'رابط صورة المنتج',
+        product_description_label: 'وصف المنتج',
+        save_btn: 'حفظ',
+        cancel_btn: 'إلغاء'
+      },
+      en: {
+        welcome: 'Welcome to Sharif Bookstore',
+        products: 'Products',
+        dashboard: 'Dashboard',
+        payments: 'Payments',
+        help: 'Help',
+        dashboard_title: 'Product Management Dashboard',
+        dashboard_desc: 'Easily add, edit, or delete products here.',
+        payment_methods: 'Available Payment Methods',
+        payment_info: '* Payment simulation only.',
+        help_title: 'Usage Instructions',
+        how_to_access: 'How to access the site:',
+        how_to_access_desc: 'Open the sharif-bookstore.html file in your browser.',
+        add_products: 'How to add products:',
+        add_products_desc: 'Go to "Dashboard" and click the + button to add new products.',
+        edit_products: 'How to edit prices or images:',
+        edit_products_desc: 'In the dashboard, click the edit icon next to the product you want to change.',
+        discounts: 'How to add discounts or promo codes:',
+        discounts_desc: 'In the current version, edit the product price directly in the dashboard to apply discount.',
+        support: 'Support and Help:',
+        support_desc: 'Contact us via email for assistance.',
+        modal_add_product: 'Add / Edit Product',
+        product_name_label: 'Product Name',
+        product_category_label: 'Category',
+        select_category: 'Select Category',
+        category_kids: 'Kids Toys',
+        category_stationery: 'Stationery',
+        category_misc: 'Miscellaneous',
+        category_home: 'Home Products',
+        product_price_label: 'Price (EGP)',
+        product_image_label: 'Product Image URL',
+        product_description_label: 'Product Description',
+        save_btn: 'Save',
+        cancel_btn: 'Cancel'
+      }
+    };
+
+    // Current language state
+    let currentLang = 'ar';
+
+    // Elements cache
+    const langButtons = {
+      ar: document.getElementById('btn-ar'),
+      en: document.getElementById('btn-en')
+    };
+    const i18nElements = document.querySelectorAll('[data-i18n]');
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const productsListEl = document.getElementById('products-list');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const productForm = document.getElementById('product-form');
+    const toastEl = document.getElementById('toast');
+    const addProductBtn = document.getElementById('btn-add-product');
+
+    // Products data management via localStorage
+    const STORAGE_KEY = 'sharif_bookstore_products';
+
+    // Generate unique ID
+    const generateId = () => crypto.randomUUID();
+
+    // Toast notification
+    let toastTimeout;
+    function showToast(message) {
+      clearTimeout(toastTimeout);
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      toastTimeout = setTimeout(() => {
+        toastEl.classList.remove('show');
+      }, 3000);
+    }
+
+    // Load products from storage
+    function loadProducts() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    // Save products to storage
+    function saveProducts(products) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    }
+
+    // Render product cards in both views
+    function renderProducts() {
+      const products = loadProducts();
+      // Clear container
+      productsListEl.innerHTML = '';
+
+      if (products.length === 0) {
+        productsListEl.innerHTML = `<p data-i18n="no_products">لا توجد منتجات لعرضها.</p>`;
+        updateI18nElements();
+        return;
+      }
+
+      for (const p of products) {
+        const card = document.createElement('article');
+        card.className = 'product-card';
+        card.setAttribute('tabindex', '0');
+        card.innerHTML = `
+          <div class="product-image" aria-label="${escapeHTML(p.name)} صورة المنتج">
+            ${
+              p.image
+                ? `<img src="${escapeHTML(p.image)}" alt="${escapeHTML(p.name)}" onerror="this.onerror=null;this.src='https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/2994c049-7652-4b78-9e27-0cca1b14160a.png';" />`
+                : `<img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92d67ff5-f239-4d5f-bb00-1c301e402f64.png" alt="لا صورة متوفرة" />`
+            }
+          </div>
+          <h3 class="product-name">${escapeHTML(p.name)}</h3>
+          <p class="product-price">${formatPrice(p.price)}</p>
+          <p class="product-description">${escapeHTML(p.description || '')}</p>
+          <div class="product-actions" aria-label="إجراءات المنتج">
+            <button class="btn-edit" data-id="${p.id}" aria-label="تعديل المنتج ${escapeHTML(p.name)}">تعديل</button>
+            <button class="btn-danger btn-delete" data-id="${p.id}" aria-label="حذف المنتج ${escapeHTML(p.name)}">حذف</button>
+          </div>
+        `;
+        productsListEl.appendChild(card);
+      }
+    }
+
+    // Escape HTML to prevent XSS attacks
+    function escapeHTML(text) {
+      return (text || '').replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[m];
+      });
+    }
+
+    // Format price number to currency format eg. "123.45 ج.م"
+    function formatPrice(price) {
+      return new Intl.NumberFormat(currentLang === 'ar' ? 'ar-EG' : 'en-US', {
+        style: 'currency',
+        currency: 'EGP',
+        minimumFractionDigits: 2
+      }).format(price);
+    }
+
+    // Open modal for add or edit product
+    let editProductId = null;
+    function openProductModal(product = null) {
+      editProductId = null;
+      if (product) {
+        editProductId = product.id;
+        productForm['name'].value = product.name;
+        productForm['category'].value = product.category;
+        productForm['price'].value = product.price;
+        productForm['image'].value = product.image || '';
+        productForm['description'].value = product.description || '';
+      } else {
+        productForm.reset();
+      }
+      modalBackdrop.classList.add('show');
+      productForm['name'].focus();
+      // set aria-hidden for main content for screen readers
+      document.querySelector('main').setAttribute('aria-hidden', 'true');
+    }
+    function closeProductModal() {
+      modalBackdrop.classList.remove('show');
+      document.querySelector('main').removeAttribute('aria-hidden');
+      editProductId = null;
+    }
+
+    // Validate form inputs
+    function validateForm() {
+      if (!productForm['name'].value.trim()) {
+        alert(currentLang === 'ar' ? 'يرجى إدخال اسم المنتج.' : 'Please enter product name.');
+        return false;
+      }
+      if (!productForm['category'].value) {
+        alert(currentLang === 'ar' ? 'يرجى اختيار القسم.' : 'Please select category.');
+        return false;
+      }
+      const priceVal = parseFloat(productForm['price'].value);
+      if (isNaN(priceVal) || priceVal < 0) {
+        alert(currentLang === 'ar' ? 'يرجى إدخال سعر صالح.' : 'Please enter a valid price.');
+        return false;
+      }
+      return true;
+    }
+
+    // Add or update product
+    function saveProduct(event) {
+      event.preventDefault();
+      if (!validateForm()) return;
+
+      const products = loadProducts();
+      const productData = {
+        id: editProductId || generateId(),
+        name: productForm['name'].value.trim(),
+        category: productForm['category'].value,
+        price: parseFloat(productForm['price'].value),
+        image: productForm['image'].value.trim(),
+        description: productForm['description'].value.trim()
+      };
+
+      if (editProductId) {
+        // Update existing
+        const index = products.findIndex(p => p.id === editProductId);
+        if (index > -1) {
+          products[index] = productData;
+          showToast(currentLang === 'ar' ? 'تم تحديث المنتج بنجاح.' : 'Product updated successfully.');
+        }
+      } else {
+        // Add new
+        products.push(productData);
+        showToast(currentLang === 'ar' ? 'تم إضافة المنتج بنجاح.' : 'Product added successfully.');
+      }
+      saveProducts(products);
+      renderProducts();
+      closeProductModal();
+    }
+
+    // Delete a product
+    function deleteProduct(id) {
+      if (!confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف هذا المنتج؟' : 'Are you sure you want to delete this product?')) return;
+      const products = loadProducts();
+      const filtered = products.filter(p => p.id !== id);
+      saveProducts(filtered);
+      renderProducts();
+      showToast(currentLang === 'ar' ? 'تم حذف المنتج.' : 'Product deleted.');
+    }
+
+    // Handle edit button click
+    productsListEl.addEventListener('click', e => {
+      if (e.target.matches('.btn-edit')) {
+        const id = e.target.getAttribute('data-id');
+        const products = loadProducts();
+        const product = products.find(p => p.id === id);
+        if (product) openProductModal(product);
+      } else if (e.target.matches('.btn-delete')) {
+        const id = e.target.getAttribute('data-id');
+        deleteProduct(id);
+      }
+    });
+
+    // Close modal on cancel
+    document.getElementById('cancel-product-btn').addEventListener('click', e => {
+      e.preventDefault();
+      closeProductModal();
+    });
+
+    // Handle modal backdrop click to close
+    modalBackdrop.addEventListener('click', e => {
+      if (e.target === modalBackdrop) {
+        closeProductModal();
+      }
+    });
+
+    // Form submit
+    productForm.addEventListener('submit', saveProduct);
+
+    // Add product button
+    addProductBtn.addEventListener('click', () => {
+      openProductModal();
+    });
+
+    // Language toggle
+    langButtons.ar.addEventListener('click', () => setLanguage('ar'));
+    langButtons.en.addEventListener('click', () => setLanguage('en'));
+
+    function setLanguage(lang) {
+      if (lang === currentLang) return;
+      currentLang = lang;
+      // Update lang buttons active state
+      Object.entries(langButtons).forEach(([key, btn]) => {
+        btn.classList.toggle('active', key === lang);
+        btn.setAttribute('aria-pressed', key === lang ? 'true' : 'false');
+      });
+
+      // Set text direction and lang attribute on html element
+      if (lang === 'ar') {
+        htmlEl.lang = 'ar';
+        htmlEl.dir = 'rtl';
+        bodyEl.dir = 'rtl';
+      } else {
+        htmlEl.lang = 'en';
+        htmlEl.dir = 'ltr';
+        bodyEl.dir = 'ltr';
+      }
+
+      updateI18nElements();
+      renderProducts();
+    }
+
+    // Update text content for i18n elements
+    function updateI18nElements() {
+      for (const el of i18nElements) {
+        const key = el.getAttribute('data-i18n');
+        const translation = translations[currentLang]?.[key];
+        if (translation) {
+          el.textContent = translation;
+        }
+      }
+    }
+
+    // Tabs navigation
+    document.querySelectorAll('.tab-link').forEach(button => {
+      button.addEventListener('click', () => {
+        const selectedTab = button.getAttribute('data-tab');
+        tabLinks.forEach(btn => {
+          const isActive = btn.getAttribute('data-tab') === selectedTab;
+          btn.classList.toggle('active', isActive);
+          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          btn.tabIndex = isActive ? 0 : -1;
+        });
+        tabContents.forEach(sec => {
+          sec.classList.toggle('active', sec.id === 'section-' + selectedTab);
+        });
+      });
+    });
+
+    // Payment button simulation
+    document.querySelectorAll('.payment-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const method = btn.getAttribute('data-method');
+        let msg = '';
+        switch (method) {
+          case 'cash':
+            msg = currentLang === 'ar' ? 'تم اختيار الدفع عند الاستلام.' : 'Cash on delivery selected.';
+            break;
+          case 'visa':
+            msg = currentLang === 'ar' ? 'تم اختيار الدفع ببطاقة فيزا.' : 'Visa payment selected.';
+            break;
+          case 'vodafone':
+            msg = currentLang === 'ar' ? 'تم اختيار الدفع عبر فودافون كاش.' : 'Vodafone Cash payment selected.';
+            break;
+          default:
+            msg = currentLang === 'ar' ? 'تم اختيار وسيلة دفع.' : 'Payment method selected.';
+        }
+        showToast(msg);
+      });
+    });
+
+    // Initialize
+    setLanguage(currentLang);
+    renderProducts();
+  })();
+</script>
+</body>
+</html>
+
